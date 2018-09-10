@@ -1,15 +1,16 @@
 package com.parsel.mqtt_client
 
-import com.parsel.mqtt_client.client.Client
+import com.parsel.mqtt_client.boards.drycontact.DryContactBoard
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class MqttClientApplication
 
 fun main(args: Array<String>) {
-    var client = Client.getClient()
-    client.sendMessage("Hay")
+    //var subscriber = ClientSubscriber()
+   // subscriber.start("/1/kabinSR/digitalIn/")
+    var board = DryContactBoard(1, "kabinSR")
+    board.start()
 
-    runApplication<MqttClientApplication>(*args)
+    //runApplication<MqttClientApplication>(*args)
 }

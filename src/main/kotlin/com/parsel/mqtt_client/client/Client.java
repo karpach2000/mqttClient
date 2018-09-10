@@ -1,31 +1,30 @@
 package com.parsel.mqtt_client.client;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import com.parsel.mqtt_client.boards.Rele.NewMessageGetHandler;
+import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
 
+
 public class Client {
 
-    private ArrayList<String> brokerUrlList =new ArrayList<>();
-    private String mqttId="dev0";
-    private int qos =2;
-    private MqttClient mqttClient;
+    protected ArrayList<String> brokerUrlList =new ArrayList<>();
+    protected String mqttId="dev0";
+    protected int qos =2;
+    protected MqttClient mqttClient;
+
+    private  SimpleMqttCallBack simpleMqttCallBack = new SimpleMqttCallBack();
 
 
     /******************СИНГЕЛТОН********************/
     private static Client client;
 
-    private Client()
-    {
+    private Client() throws MqttException {
         brokerUrlList.add("tcp://5.200.53.139:1883");
+        connect();
     }
 
-    public  static Client getClient()
-    {
+    public  static Client getClient() throws MqttException {
         if(client==null)
         {
             client = new Client();
@@ -39,7 +38,7 @@ public class Client {
         try {
             connect();
             publishMessage(messageText, topic );
-            disconnect();
+            //disconnect();
         }
         catch(MqttException me) {
             System.out.println("reason "+me.getReasonCode());
@@ -51,17 +50,36 @@ public class Client {
         }
     }
 
+    public void subscribe(String topic)
+    {
+        try {
+            mqttClient.subscribe(topic);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addReleStateChangeHandlers(NewMessageGetHandler handler) {
+        simpleMqttCallBack.addReleStateChangeHandlers(handler);
+    }
+
     /******************ПРИВАТЫ********************/
+
+
 
     private void connect() throws MqttException {
         String brokerUrl= brokerUrlList.get(0);
-        MemoryPersistence persistence = new MemoryPersistence();
-        mqttClient = new MqttClient(brokerUrl, mqttId, persistence);
+        //MemoryPersistence persistence = new MemoryPersistence();
+        mqttClient = new MqttClient(brokerUrl, mqttId);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
         System.out.println("Connecting to broker: "+ brokerUrl);
         mqttClient.connect(connOpts);
         System.out.println("Connected");
+
+
+        mqttClient.setCallback(simpleMqttCallBack);
+
     }
 
 
@@ -76,7 +94,7 @@ public class Client {
     private void disconnect() throws MqttException {
         mqttClient.disconnect();
         System.out.println("Disconnected");
-        System.exit(0);
+        //System.exit(0);
     }
 
 }
