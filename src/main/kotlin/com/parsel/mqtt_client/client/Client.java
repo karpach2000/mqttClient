@@ -59,7 +59,7 @@ public class Client {
         }
     }
 
-    public void addReleStateChangeHandlers(NewMessageGetHandler handler) {
+    public void addNewMessageGetHandlers(NewMessageGetHandler handler) {
         simpleMqttCallBack.addReleStateChangeHandlers(handler);
     }
 
@@ -73,6 +73,8 @@ public class Client {
         mqttClient = new MqttClient(brokerUrl, mqttId);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
+        connOpts.setUserName("parcel");
+        connOpts.setPassword("parcel".toCharArray());
         System.out.println("Connecting to broker: "+ brokerUrl);
         mqttClient.connect(connOpts);
         System.out.println("Connected");

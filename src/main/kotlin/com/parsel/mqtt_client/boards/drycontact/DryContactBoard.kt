@@ -43,7 +43,7 @@ public  class DryContactBoard( id: Long, plataName: String) : Board(id, plataNam
 
 
 
-    private var client = Client.getClient()
+
     /**
      * Плата
      */
@@ -55,18 +55,24 @@ public  class DryContactBoard( id: Long, plataName: String) : Board(id, plataNam
     /**
      * Запустить.
      */
-    public override fun start() {
-        var portName=sensorRead.findPort()
-        if(!portName.equals("ERROR"))
-        {
-            System.out.print("Порт найден "+portName)
-            sensorRead.addBoardStateChangeHandler(BoardStateChangeEvent(client, topic))
-            sensorRead.startRead()
+    public override fun start()  : Boolean {
+        if(!onOffState) {
+            var portName = sensorRead.findPort()
+            if (!portName.equals("ERROR")) {
+                System.out.print("Порт найден " + portName)
+                sensorRead.addBoardStateChangeHandler(BoardStateChangeEvent(client, topic))
+                sensorRead.startRead()
+                onOffState = true
+                return true
+            } else {
+                System.out.print("Порт  не найден " + portName)
+                onOffState = false
+                return false
+            }
         }
-        else
-        {
-            System.out.print("Порт  не найден "+portName)
-
+        else {
+            System.out.println("Не Возможно запустить сенсор реадер, т.к он уже запущен.")
+            return false
         }
 
     }
@@ -74,8 +80,17 @@ public  class DryContactBoard( id: Long, plataName: String) : Board(id, plataNam
     /**
      * Остановить.
      */
-    public override fun stop() {
+    public override fun stop() : Boolean {
+        if(onOffState) {
+            onOffState = false
+            System.out.println("Плата остановлена")
+            return true
+        }
+        else
+        {
 
+            return false
+        }
     }
 
 
